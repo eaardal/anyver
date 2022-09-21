@@ -25,30 +25,12 @@ type AnyverYaml struct {
 	Contexts map[string]map[string]string `yaml:"contexts"`
 }
 
-//func (a AnyverYaml) Active() (active map[string]string, err error) {
-//	files, err := os.ReadDir(AnyverAppsDirPath)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	for _, file := range files {
-//		active[file.Name()]
-//	}
-//	return active, nil
-//}
-
 func (a AnyverYaml) ActiveVersionName(app string) (versionName string, err error) {
-	//active, err := a.Active()
-	//if err != nil {
-	//	return "", err
-	//}
-
 	for appName, activeVersion := range a.Active {
 		if appName == app {
 			return activeVersion, nil
 		}
 	}
-
 	return "", ErrNoActive
 }
 
