@@ -1,0 +1,10 @@
+active:
+    tryme: demo
+apps:
+    tryme:
+        demo: echo "tryme demo"
+contexts:
+    default:
+        demo: _system
+    tryall:
+        tryme: demo

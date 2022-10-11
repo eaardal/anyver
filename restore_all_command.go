@@ -15,10 +15,7 @@ var RestoreAllCommand = &cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		yamlFilePath := c.String("config")
-		if yamlFilePath == "" {
-			yamlFilePath = DefaultAnyverYamlPath
-		}
+		yamlFilePath, _ := SetAnyverPaths(c)
 
 		anyverYaml, err := ReadAnyverYaml(yamlFilePath)
 		if err != nil {

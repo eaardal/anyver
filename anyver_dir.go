@@ -7,8 +7,8 @@ import (
 	"path"
 )
 
-var AnyverDirPath = path.Join(os.Getenv("HOME"), ".anyver")
-var AnyverAppsDirPath = path.Join(AnyverDirPath, "apps")
+var DefaultAnyverDirPath = path.Join(os.Getenv("HOME"), ".anyver")
+var AnyverAppsDirPath = path.Join(DefaultAnyverDirPath, "apps")
 
 func EnsureAnyverAppsDirExists() error {
 	if err := os.MkdirAll(AnyverAppsDirPath, os.ModePerm); err != nil {

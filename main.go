@@ -11,6 +11,7 @@ func main() {
 		Name:  "Anything Version Manager",
 		Usage: "",
 		Commands: []*cli.Command{
+			InitCommand,
 			ConfigCommand,
 			UseCommand,
 			RestoreCommand,

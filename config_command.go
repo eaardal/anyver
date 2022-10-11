@@ -16,10 +16,7 @@ var ConfigCommand = &cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		yamlFilePath := c.String("config")
-		if yamlFilePath == "" {
-			yamlFilePath = DefaultAnyverYamlPath
-		}
+		yamlFilePath, _ := SetAnyverPaths(c)
 
 		file, err := os.ReadFile(yamlFilePath)
 		if err != nil {

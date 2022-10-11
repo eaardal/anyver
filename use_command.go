@@ -16,13 +16,10 @@ var UseCommand = &cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		yamlFilePath := c.String("config")
-		if yamlFilePath == "" {
-			yamlFilePath = DefaultAnyverYamlPath
-		}
+		yamlFilePath, _ := SetAnyverPaths(c)
 
 		args := c.Args()
-		if c.NArg() != 2 {
+		if c.NArg() < 2 {
 			return fmt.Errorf("missing args: see usage")
 		}
 

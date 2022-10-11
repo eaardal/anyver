@@ -17,7 +17,7 @@ var (
 	ErrNoVersion           = errors.New("version not found")
 )
 
-var DefaultAnyverYamlPath = fmt.Sprintf("%s/config.yaml", AnyverDirPath)
+var DefaultAnyverYamlPath = fmt.Sprintf("%s/config.yaml", DefaultAnyverDirPath)
 
 type AnyverYaml struct {
 	Active   map[string]string            `yaml:"active"`
