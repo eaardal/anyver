@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/urfave/cli/v2"
 	"os"
 )
@@ -28,7 +29,11 @@ var AppsCommand = &cli.Command{
 			write("No active app aliases")
 		} else {
 			for _, appFile := range appFiles {
-				write(appFile.Name())
+				file, err := os.ReadFile(appFile.Name())
+				if err != nil {
+					return fmt.Errorf("failed to read %s: %v", appFile.Name(), err)
+				}
+				write(yellow(appFile.Name()) + " " + cyan(string(file)))
 			}
 		}
 
