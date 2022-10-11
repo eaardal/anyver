@@ -7,7 +7,7 @@ import (
 
 var UseCommand = &cli.Command{
 	Name:  "use",
-	Usage: "Set the given version as the active command when running the app",
+	Usage: "Set the script for the given app name as the active app alias",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:    "config",

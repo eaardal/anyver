@@ -7,7 +7,7 @@ import (
 
 var ConfigCommand = &cli.Command{
 	Name:  "config",
-	Usage: "Print the entire Anyver config file as-is",
+	Usage: "Print the Anyver YAML config file as-is",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:    "config",
@@ -15,6 +15,7 @@ var ConfigCommand = &cli.Command{
 			EnvVars: []string{"ANYVER_CONFIG"},
 		},
 	},
+	Aliases: []string{"yaml"},
 	Action: func(c *cli.Context) error {
 		yamlFilePath, _ := SetAnyverPaths(c)
 
@@ -25,22 +26,6 @@ var ConfigCommand = &cli.Command{
 
 		write(yamlFilePath)
 		write(string(file))
-
-		appFiles, err := os.ReadDir(AnyverAppsDirPath)
-		if err != nil {
-			return err
-		}
-
-		writeEmptyLine()
-		write("Active app versions in %s:", AnyverAppsDirPath)
-
-		if len(appFiles) == 0 {
-			write("No active app versions")
-		} else {
-			for _, appFile := range appFiles {
-				write(appFile.Name())
-			}
-		}
 
 		return nil
 	},

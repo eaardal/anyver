@@ -8,7 +8,7 @@ import (
 
 var InitCommand = &cli.Command{
 	Name:  "init",
-	Usage: "Initialize Anyver, creates a default Anyver config file if it doesn't exist",
+	Usage: "Initialize Anyver. Creates a default Anyver YAML config file if it doesn't exist",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:    "config",

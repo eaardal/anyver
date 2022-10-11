@@ -7,7 +7,7 @@ import (
 
 var RestoreCommand = &cli.Command{
 	Name:  "restore",
-	Usage: "Removes the Anyver shortcut which should make the system's default executable the main one",
+	Usage: "Removes the current Anyver app alias. This should make the system's default executable for the given app the active one.",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:    "config",

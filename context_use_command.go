@@ -7,7 +7,7 @@ import (
 
 var ContextUseCommand = &cli.Command{
 	Name:  "use",
-	Usage: "Use a context",
+	Usage: "Set the script for all apps in the given context as the active app aliases",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:    "config",
