@@ -14,17 +14,22 @@ var ConfigCommand = &cli.Command{
 			Aliases: []string{"c"},
 			EnvVars: []string{"ANYVER_CONFIG"},
 		},
+		&cli.StringFlag{
+			Name:    "apps-dir",
+			Aliases: []string{"a"},
+			EnvVars: []string{"ANYVER_APPS_DIR"},
+		},
 	},
 	Aliases: []string{"yaml"},
 	Action: func(c *cli.Context) error {
-		yamlFilePath, _ := SetAnyverPaths(c)
+		paths := GetAnyverPaths(c)
 
-		file, err := os.ReadFile(yamlFilePath)
+		file, err := os.ReadFile(paths.ConfigFile)
 		if err != nil {
 			return err
 		}
 
-		write(yamlFilePath)
+		write(paths.ConfigFile)
 		write(string(file))
 
 		return nil

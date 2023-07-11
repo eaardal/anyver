@@ -1,29 +1,28 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path"
 )
 
-var DefaultAnyverDirPath = path.Join(os.Getenv("HOME"), ".anyver")
-var AnyverAppsDirPath = path.Join(DefaultAnyverDirPath, "apps")
+func EnsureAnyverAppsDirExists() (string, error) {
+	paths := GetAnyverPaths(nil)
 
-func EnsureAnyverAppsDirExists() error {
-	if err := os.MkdirAll(AnyverAppsDirPath, os.ModePerm); err != nil {
-		return fmt.Errorf("failed to ensure %s exists: %+v", AnyverAppsDirPath, err)
+	if err := os.MkdirAll(paths.AppsDir, os.ModePerm); err != nil {
+		return paths.AppsDir, fmt.Errorf("failed to ensure %s exists: %+v", paths.AppsDir, err)
 	}
-	return nil
+	return paths.AppsDir, nil
 }
 
 func SetAppAlias(appName string, aliasContent string) error {
-	if err := EnsureAnyverAppsDirExists(); err != nil {
+	appsDir, err := EnsureAnyverAppsDirExists()
+	if err != nil {
 		return err
 	}
 
-	aliasFilePath := path.Join(AnyverAppsDirPath, appName)
-	if fileExists(aliasFilePath) {
+	aliasFilePath := path.Join(appsDir, appName)
+	if FileExists(aliasFilePath) {
 		if err := os.Remove(aliasFilePath); err != nil {
 			return fmt.Errorf("failed to remove alias file %s: %+v", aliasFilePath, err)
 		}
@@ -37,23 +36,17 @@ func SetAppAlias(appName string, aliasContent string) error {
 }
 
 func DeleteAppAlias(appName string) error {
-	if err := EnsureAnyverAppsDirExists(); err != nil {
+	appsDir, err := EnsureAnyverAppsDirExists()
+	if err != nil {
 		return err
 	}
 
-	aliasFilePath := path.Join(AnyverAppsDirPath, appName)
-	if fileExists(aliasFilePath) {
+	aliasFilePath := path.Join(appsDir, appName)
+	if FileExists(aliasFilePath) {
 		if err := os.Remove(aliasFilePath); err != nil {
 			return fmt.Errorf("failed to remove alias file %s: %+v", aliasFilePath, err)
 		}
 	}
 
 	return nil
-}
-
-func fileExists(filePath string) bool {
-	if _, err := os.Stat(filePath); errors.Is(err, os.ErrNotExist) {
-		return false
-	}
-	return true
 }

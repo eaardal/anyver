@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/urfave/cli/v2"
-	"path/filepath"
 )
 
 var InitCommand = &cli.Command{
@@ -15,28 +14,31 @@ var InitCommand = &cli.Command{
 			Aliases: []string{"c"},
 			EnvVars: []string{"ANYVER_CONFIG"},
 		},
+		&cli.StringFlag{
+			Name:    "apps-dir",
+			Aliases: []string{"a"},
+			EnvVars: []string{"ANYVER_APPS_DIR"},
+		},
 	},
 	Action: func(c *cli.Context) error {
-		yamlFilePath, yamlFileDir := SetAnyverPaths(c)
+		paths := GetAnyverPaths(c)
 
-		if err := CreateDirIfNotExists(yamlFileDir); err != nil {
-			return fmt.Errorf("failed to crate dir %s: %v", yamlFileDir, err)
+		if err := CreateDirIfNotExists(paths.RootDir); err != nil {
+			return fmt.Errorf("failed to crate dir %s: %v", paths.RootDir, err)
 		} else {
-			write("Ensured %s exists", yamlFileDir)
+			write("Ensured %s exists", paths.RootDir)
 		}
 
-		AnyverAppsDirPath = filepath.Join(yamlFileDir, "apps")
-
-		if err := CreateDirIfNotExists(AnyverAppsDirPath); err != nil {
-			return fmt.Errorf("failed to create apps dir %s: %v", AnyverAppsDirPath, err)
+		if err := CreateDirIfNotExists(paths.AppsDir); err != nil {
+			return fmt.Errorf("failed to create apps dir %s: %v", paths.AppsDir, err)
 		} else {
-			write("Ensured %s exists", AnyverAppsDirPath)
+			write("Ensured %s exists", paths.AppsDir)
 		}
 
-		if err := CreateFileIfNotExists(yamlFilePath); err != nil {
-			return fmt.Errorf("failed to create config file %s: %v", yamlFilePath, err)
+		if err := CreateFileIfNotExists(paths.ConfigFile); err != nil {
+			return fmt.Errorf("failed to create config file %s: %v", paths.ConfigFile, err)
 		} else {
-			write("Ensured %s exists", yamlFilePath)
+			write("Ensured %s exists", paths.ConfigFile)
 		}
 
 		defaultConfig := &AnyverYaml{
@@ -58,10 +60,10 @@ var InitCommand = &cli.Command{
 			},
 		}
 
-		if err := SaveAnyverYaml(defaultConfig, yamlFilePath); err != nil {
-			return fmt.Errorf("failed to save %s: %v", yamlFilePath, err)
+		if err := SaveAnyverYaml(defaultConfig, paths.ConfigFile); err != nil {
+			return fmt.Errorf("failed to save %s: %v", paths.ConfigFile, err)
 		}
-		write("Created %s", yamlFilePath)
+		write("Created %s", paths.ConfigFile)
 
 		return nil
 	},

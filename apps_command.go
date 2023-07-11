@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"github.com/urfave/cli/v2"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
 )
 
 var AppsCommand = &cli.Command{
@@ -15,26 +18,50 @@ var AppsCommand = &cli.Command{
 			Aliases: []string{"c"},
 			EnvVars: []string{"ANYVER_CONFIG"},
 		},
+		&cli.StringFlag{
+			Name:    "apps-dir",
+			Aliases: []string{"a"},
+			EnvVars: []string{"ANYVER_APPS_DIR"},
+		},
 	},
 	Action: func(c *cli.Context) error {
-		appFiles, err := os.ReadDir(AnyverAppsDirPath)
+		paths := GetAnyverPaths(c)
+
+		appFiles, err := os.ReadDir(paths.AppsDir)
 		if err != nil {
 			return err
 		}
 
-		writeEmptyLine()
-		write("Active app aliases in %s:", AnyverAppsDirPath)
+		write("Active app aliases in %s:", paths.AppsDir)
 
 		if len(appFiles) == 0 {
 			write("No active app aliases")
-		} else {
-			for _, appFile := range appFiles {
-				file, err := os.ReadFile(appFile.Name())
-				if err != nil {
-					return fmt.Errorf("failed to read %s: %v", appFile.Name(), err)
-				}
-				write(yellow(appFile.Name()) + " " + cyan(string(file)))
+			return nil
+		}
+
+		for _, appFile := range appFiles {
+			appAliasFilePath := filepath.Join(paths.AppsDir, appFile.Name())
+
+			file, err := os.ReadFile(appAliasFilePath)
+			if err != nil {
+				return fmt.Errorf("failed to read %s: %v", appFile.Name(), err)
 			}
+
+			out, err := exec.Command("which", appFile.Name()).CombinedOutput()
+			if err != nil {
+				return fmt.Errorf("failed to run which %s: %v", appFile.Name(), err)
+			}
+			trimmedOut := strings.TrimSuffix(string(out), "\n")
+
+			whichOut := green(trimmedOut)
+			if trimmedOut != appAliasFilePath {
+				whichOut = red(trimmedOut)
+			}
+			which := fmt.Sprintf("which %s: %s", yellow(appFile.Name()), whichOut)
+
+			appName := yellow(appFile.Name())
+			appScript := cyan(fmt.Sprintf("%q", string(file)))
+			write(fmt.Sprintf("%s: %s - %s", appName, appScript, which))
 		}
 
 		return nil

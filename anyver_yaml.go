@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"gopkg.in/yaml.v3"
 	"os"
 )
@@ -16,8 +15,6 @@ var (
 	ErrActiveVersionBroken = errors.New("active version refers to a nonexisting version")
 	ErrNoVersion           = errors.New("version not found")
 )
-
-var DefaultAnyverYamlPath = fmt.Sprintf("%s/config.yaml", DefaultAnyverDirPath)
 
 type AnyverYaml struct {
 	Active   map[string]string            `yaml:"active"`

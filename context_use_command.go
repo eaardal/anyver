@@ -14,9 +14,14 @@ var ContextUseCommand = &cli.Command{
 			Aliases: []string{"c"},
 			EnvVars: []string{"ANYVER_CONFIG"},
 		},
+		&cli.StringFlag{
+			Name:    "apps-dir",
+			Aliases: []string{"a"},
+			EnvVars: []string{"ANYVER_APPS_DIR"},
+		},
 	},
 	Action: func(c *cli.Context) error {
-		yamlFilePath, _ := SetAnyverPaths(c)
+		paths := GetAnyverPaths(c)
 
 		args := c.Args()
 		if c.NArg() < 1 {
@@ -28,7 +33,7 @@ var ContextUseCommand = &cli.Command{
 			return fmt.Errorf("missing arg: context name")
 		}
 
-		anyverYaml, err := ReadAnyverYaml(yamlFilePath)
+		anyverYaml, err := ReadAnyverYaml(paths.ConfigFile)
 		if err != nil {
 			return err
 		}
@@ -66,7 +71,7 @@ var ContextUseCommand = &cli.Command{
 			write("Now using version %q for app %q", version.Name, version.AppName)
 		}
 
-		if err := SaveAnyverYaml(anyverYaml, yamlFilePath); err != nil {
+		if err := SaveAnyverYaml(anyverYaml, paths.ConfigFile); err != nil {
 			return err
 		}
 
