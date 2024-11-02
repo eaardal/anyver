@@ -1,6 +1,6 @@
 # Anyver
 
-Anything Version Manager - A version manager to temporarily replace any program with any script
+Anything Version Manager - A version manager to temporarily replace any program with any script on your PATH.
 
 ## What does Anyver solve?
 
