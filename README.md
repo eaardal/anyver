@@ -8,7 +8,7 @@ Anything Version Manager - A version manager to temporarily replace any program 
 
 If your developer machine is like mine, it's filled with small CLI tools and utilities that are installed directly on the machine with a package manager like Homebrew.
 
-Examples of such tools in my experience can be jq, yq, buf, protoc or mockery.
+Examples of such tools in my experience can be jq, yq, buf, protoc, golangci-lint, gosec and mockery.
 
 When working in (or for) a company on a project, they might use some of the same set of tools and utilities, but different (typically older) versions.
 
@@ -20,9 +20,9 @@ Perhaps the most obvious solution is to run the tools inside a Docker image, but
 
 Anyver is a small utility that aims to remedy this problem by managing a set of alternative scripts for any given program name. When a script is activated by Anyver, an executable (bash) script with the same name as the program will be put in `~/.anyver/apps`. The content of this script file will be whatever script content you have configured in a global Anyver yaml config file.
 
-For example, if I want to create a spoofed version of `jq`, I can run `anyver use jq the-other-version`. If the script `the-other-version` has the content `docker exec --workdir $PWD my-toolbox-image $@`, then that will be the content of the file `~/.anyver/apps/jq` created by Anyver.
+For example, if I want to create a spoofed version of `jq`, I can run `anyver use jq the-other-version`. If the script `the-other-version` has the content `docker exec --workdir $PWD my-toolbox-image jq $@`, then that will be the content of the file `~/.anyver/apps/jq` created by Anyver.
 
-Since I've made sure that `~/.anyver/apps` is always first on my `PATH` environment variable, I know that Anyver's spoofed version of the executable will "win" when a `jq` command is executed in a shell.
+Since I've made sure that `~/.anyver/apps` is always first on my `PATH` environment variable, I know that Anyver's spoofed version of the executable will "win" when a `jq` command is executed in a shell (the shell finds the spoofed executable first).
 
 To restore `jq` to its original executable (`/usr/local/bin/jq` in my case), I'll run `anyver restore jq` and Anyver will remove the file `~/.anyver/apps/jq` so that the next (default) occurrance of jq on my `PATH` will be found and executed.
 
@@ -41,7 +41,7 @@ go install github.com/eaardal/anyver
 Or clone the repo, build it and make sure the built executable is somewhere on your `PATH`:
 
 ```
-go build -o anyver main.go && cp <REPO_DIR> <DIR_ON_PATH>
+go build -o anyver ./... && cp ./anyver <DIR_ON_PATH>/anyver
 ```
 
 ### 2. Create the inital Anyver config file
@@ -54,7 +54,7 @@ anyver init
 
 This will create a default `~/.anyver/config.yaml` file.
 
-### 3. Ensure `~/.anyver/apps` is _first_ on your `PATH`
+### 3. Ensure `~/.anyver/apps` is **_first_** on your `PATH`
 
 Add this to your `.zshrc`, `.bashrc` or other shell config script:
 
@@ -62,7 +62,7 @@ Add this to your `.zshrc`, `.bashrc` or other shell config script:
 export PATH=$HOME/.anyver/apps:$PATH
 ```
 
-The path is not required to be first-first, but it should be in your `PATH` before wherever your programs are usually found, such as `/usr/local/bin` and `/usr/bin`.
+The path is not required to be first-first, but it should be in your `PATH` before wherever your programs are usually found, such as `/usr/local/bin` and `/usr/bin`. This is crucial for anyver to work.
 
 You can inspect your `PATH` with: `echo $PATH`.
 
@@ -104,6 +104,7 @@ apps:
     my-company: docker run --rm -it --volume $PWD:$PWD --workdir $PWD my-toolbox-image jq $@
   mockery:
     my-company: docker run --rm -it --volume $PWD:$PWD --workdir $PWD my-toolbox-image mockery $@
+    personal-project: docker run --rm -it --volume $PWD:$PWD --workdir $PWD my-private-image mockery $@
 contexts:
   default:
     jq: _system
@@ -111,6 +112,8 @@ contexts:
   all-apps-my-company:
     jq: my-company
     mockery: my-company
+  hobby-tinkering:
+    mockery: personal-project
 ```
 
 ### `use`
@@ -225,3 +228,67 @@ Now using version "my-company" for app "mockery"
 ### `context restore`
 
 Same as restore or restore-all but only deletes apps in the given context.
+
+## Real world example
+
+My current `~/.anyver/config.yaml`:
+
+```yaml
+active:
+  all: _system
+  buf: rp
+  easyjson: rp
+  golangci-lint: rp
+  gosec: rp
+  grpcurl: _system
+  kafkacat: _system
+  mockery: rp
+  protoc: rp
+  semtag: rp
+apps:
+  buf:
+    rp: docker exec --workdir "$PWD" toolbox buf $@
+  easyjson:
+    rp: docker exec --workdir "$PWD" toolbox easyjson $@
+  golangci-lint:
+    rp: docker exec --workdir "$PWD" toolbox golangci-lint $@
+  gosec:
+    rp: docker exec --workdir "$PWD" toolbox gosec $@
+  grpcurl:
+    rp: docker exec --workdir "$PWD" toolbox grpcurl $@
+  kafkacat:
+    rp: docker exec --workdir "$PWD" toolbox kafkacat $@
+  mockery:
+    rp: docker exec --workdir "$PWD" toolbox mockery $@
+  protoc:
+    rp: docker exec --workdir "$PWD" toolbox protoc $@
+  semtag:
+    rp: docker exec --workdir "$PWD" toolbox semtag $@
+contexts:
+  default:
+    buf: _system
+    easyjson: _system
+    golangci-lint: _system
+    gosec: _system
+    kafkacat: _system
+    mockery: _system
+    protoc: _system
+    semtag: _system
+    sops: _system
+  company:
+    buf: rp
+    easyjson: rp
+    golangci-lint: rp
+    gosec: rp
+    grpcurl: rp
+    kafkacat: rp
+    mockery: rp
+    protoc: rp
+    semtag: rp
+```
+
+Notes:
+
+- "rp" is a shortname for my team at this company. The name could be anything.
+- I could also have more than just one override for each executable.
+- `grpcurl` and `kafkacat` is currently using the machine-installed executable in /usr/bin (using `_system`). If I were to run `anyver use grpcurl rp` it would use the specified Docker command instead.
